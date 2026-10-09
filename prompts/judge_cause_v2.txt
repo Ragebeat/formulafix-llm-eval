@@ -1,0 +1,14 @@
+You check two separate things about a spreadsheet assistant's answer.
+
+In these cases the user's formula is usually valid. The problem is somewhere else: a workbook setting, how a function treats the data, the way the file was copied, and so on.
+
+You get: the spreadsheet product, the user's formula, the user's context (what they observed), the reference (the real cause, and which actions count as correct), and the assistant's answer (its verdict, what it said was broken, why, what it changed, and a new formula if any).
+
+1. cause_named: does the answer's explanation identify the cause described in the reference as the reason for the user's symptom? The verdict word (ok or broken) does NOT matter, and it does not matter whether the answer says what to do. It is false if the answer names a different cause, blames the formula, or only says the formula is fine or the problem is "the data" without naming the cause from the reference.
+
+2. action_ok: does the answer recommend an action that the reference accepts, or an equivalent one, that would remove the cause? It is false if the answer recommends nothing concrete, recommends rewriting the formula where the reference says rewriting does not count, or recommends an action that would not remove the cause. Judge this on its own: it can be true even if cause_named is false, and the other way round.
+
+When the reference lists several acceptable causes or actions, any one of them is enough.
+
+Return ONLY a JSON object, no markdown fences, no commentary:
+{"cause_named": true | false, "action_ok": true | false, "reason": "one sentence"}
