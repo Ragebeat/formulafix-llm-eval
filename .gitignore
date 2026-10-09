@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+
+# Secrets: .env and every profile (.env.openrouter, ...); only the examples are kept
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# One-off diagnostics
+src/_diag*.py
+
+# Everything under data/ is kept: the golden set and the run reports are
+# measurement results, and they are the value of this repository.

@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:17
+    container_name: formulafix-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-formulafix}
+      POSTGRES_USER: ${POSTGRES_USER:-formulafix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      # Cyrillic and Japanese formulas and sheet names — UTF-8 only
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      # Host port is configurable (POSTGRES_PORT in .env): 5433 is the RAG
+      # project's database, 5434 was taken by another local Postgres.
+      # 127.0.0.1 only — the data is not for the LAN.
+      - "127.0.0.1:${POSTGRES_PORT:-5440}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-formulafix} -d ${POSTGRES_DB:-formulafix}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

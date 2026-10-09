@@ -1,0 +1,14 @@
+[project]
+name = "formulafix"
+version = "0.1.0"
+description = "Excel / Google Sheets formula error diagnosis with an LLM: FastAPI service, golden dataset, eval"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "opentelemetry-exporter-otlp-proto-http>=1.30",
+    "opentelemetry-sdk>=1.30",
+    "psycopg[binary]>=3.3.5",
+    "pydantic>=2.0",
+    "uvicorn[standard]>=0.52.4",
+]
