@@ -1,0 +1,222 @@
+[
+  {
+    "n": 1,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": false,
+    "ms": 701,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "broken / #REF!"
+  },
+  {
+    "n": 2,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": false,
+    "ms": 644,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=VLOOKUP(A2,Sheet2!A:B,2,0)",
+    "expected": "broken / logic"
+  },
+  {
+    "n": 3,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#VALUE!",
+    "ok": true,
+    "ms": 21889,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=IFERROR(A1+B1, \"Check B1\")",
+    "expected": "broken / #VALUE!"
+  },
+  {
+    "n": 4,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "syntax",
+    "ok": true,
+    "ms": 485,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=SUM(A1:A10)",
+    "expected": "broken / syntax"
+  },
+  {
+    "n": 5,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#N/A",
+    "ok": true,
+    "ms": 552,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=INDEX(A:A,MATCH(TRIM(D1),B:B,0))",
+    "expected": "broken / #N/A"
+  },
+  {
+    "n": 6,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#DIV/0!",
+    "ok": true,
+    "ms": 530,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=IF(B1=0, 0, A1/B1)",
+    "expected": "broken|ok / #DIV/0!|-"
+  },
+  {
+    "n": 7,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 483,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok / -"
+  },
+  {
+    "n": 8,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "circular",
+    "ok": true,
+    "ms": 474,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "broken / circular"
+  },
+  {
+    "n": 9,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#NAME?",
+    "ok": true,
+    "ms": 499,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=VLOOKUP(A2,B:C,2,FALSE)",
+    "expected": "broken / #NAME?"
+  },
+  {
+    "n": 10,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "syntax",
+    "ok": false,
+    "ms": 565,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=IF(A1>10,\"yes\",\"no\")",
+    "expected": "broken|ok / logic|-"
+  },
+  {
+    "n": 11,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "syntax",
+    "ok": true,
+    "ms": 662,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=QUERY(A:C, \"select A where B > 100 and C > 50\")",
+    "expected": "broken / syntax|#VALUE!|logic"
+  },
+  {
+    "n": 12,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#REF!",
+    "ok": true,
+    "ms": 476,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "broken|ok / #REF!|-"
+  },
+  {
+    "n": 13,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 536,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok|broken / -|logic"
+  },
+  {
+    "n": 14,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "#VALUE!",
+    "ok": true,
+    "ms": 635,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=FILTER(A:A, B1:B10=TRUE)",
+    "expected": "broken / #VALUE!|logic|#N/A"
+  },
+  {
+    "n": 15,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 20781,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok / -"
+  },
+  {
+    "n": 16,
+    "status": "OK",
+    "verdict": "broken",
+    "error": "logic",
+    "ok": true,
+    "ms": 20958,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "=IF(A1>90,\"A\",IF(A1>80,\"B\",IF(A1>70,\"C\",IF(A1>60,\"D\",\"F\"))))",
+    "expected": "ok|broken / -|logic|syntax"
+  },
+  {
+    "n": 17,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 498,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok / -"
+  },
+  {
+    "n": 18,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 20679,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok|broken / -|logic"
+  },
+  {
+    "n": 19,
+    "status": "OK",
+    "verdict": "ok",
+    "error": "-",
+    "ok": true,
+    "ms": 618,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "ok|broken / -|syntax"
+  },
+  {
+    "n": 20,
+    "status": "OK",
+    "verdict": "unparseable",
+    "error": "-",
+    "ok": true,
+    "ms": 476,
+    "model": "qwen/qwen3.8-27b",
+    "fixed": "",
+    "expected": "unparseable / -"
+  }
+]
