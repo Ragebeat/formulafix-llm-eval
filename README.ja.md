@@ -13,7 +13,7 @@
 > **ステータス: 完了。** ハーネス、ゴールデンセット(80 件)、別個の検証セット(35 件)、ベースライン、事前登録した 2 つの実験(どちらも計測済みで、採用なし)、トレーシングが完成しています。サービスはデプロイしていません。このリポジトリは計測のためのものです。
 
 
-**目次:** [結果](#結果) · [アーキテクチャ](#アーキテクチャ) · [手法](#手法) · [うまくいかなかったこと](#うまくいかなかったこと) · [トレーシング](#トレーシング) · [注意点](#注意点) · [実行方法](#実行方法) · [ロードマップ](#ロードマップ) · [ライセンス](#ライセンス)
+**目次:** [結果](#結果) · [アーキテクチャ](#アーキテクチャ) · [手法](#手法) · [うまくいかなかったこと](#うまくいかなかったこと) · [トレーシング](#トレーシング) · [注意点](#注意点) · [数値の出所](#数値の出所) · [実行方法](#実行方法) · [ロードマップ](#ロードマップ) · [ライセンス](#ライセンス)
 
 ---
 
@@ -173,6 +173,30 @@ uv run python src/run_golden.py --label x --trace          # ゴールデン実�
 
 ---
 
+## 数値の出所
+
+すべての実行は `data/runs/<id>-<label>.json`（構成と、採点済みの全ケースの回答）としてコミットしています。上の表は、LLM を一度も呼ばずに新しいクローンで再計算できます。
+
+```bash
+uv run python src/db_init.py
+uv run python src/load_golden.py
+uv run python src/load_golden.py --set validation
+uv run python src/export_runs.py --import      # data/runs/*.json -> データベース。実行 id はそのまま
+uv run python src/report.py --run 9 10 11      # 下の任意の行
+```
+
+| 表の行 | 実行 |
+|---|---|
+| ゴールデン: Qwen、元のプロンプト、T=0.2 | 3 4 5 |
+| ゴールデン: DeepSeek、T=0.2（採用した構成） | 9 10 11 |
+| ゴールデン: DeepSeek、T=0（実験 E1） | 12 13 14 |
+| ゴールデン: DeepSeek、`v2_locale` プロンプト（実験 E2） | 25 26 27 |
+| 検証: Qwen | 16 19 20 |
+| 検証: DeepSeek | 15 17 18 |
+| 検証: DeepSeek、`v2_locale`（E2） | 22 23 24 |
+
+E2 では `--label` ではなく `--run` を使ってください。ラベル `deepseek-v2locale` は、記録として残した中断済みの 16 ケースの実行 21 にも付いています。実行 2、6、8、28 は動作確認用（5 ケース）です。ゴールデンセット以前の Node スクリプトの結果は `data/baseline_node/`、判定モデルの手動監査は `data/judge_audit_raw.txt` にあります。
+
 ## 実行方法
 
 必要なもの: Python 3.14、[uv](https://docs.astral.sh/uv/)、Docker。
@@ -203,7 +227,7 @@ uv run python src/judge_cause.py --label baseline-val --rubric v2
 
 Windows と Docker の組み合わせでは、`localhost` ではなく `127.0.0.1` に接続してください(コードはデフォルトでそうしています)。`localhost` はまず IPv6 で試されますが、公開ポートは IPv4 のみのため、スクリプトの起動 1 回に 0.35 秒ではなく 130 秒かかっていました。
 
-`tools/check_prompt_parity.py` は、Python 版のプロンプトが Node 版と一語一句同じであることを検証します。
+`tools/check_prompt_parity.py <パス>/app/lib/analyze.ts` は、Python 版のプロンプトが Node 版と一語一句同じであることを検証します。Node 版は公開していません。このスクリプトは、最初の実行前に移植をどう確認したかを示すものです。
 
 ---
 

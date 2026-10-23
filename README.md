@@ -13,7 +13,7 @@ Same discipline as the [RAG project](https://github.com/Ragebeat/rag-japanese-la
 > **Status: finished.** The harness, the golden set (80 cases), a separate validation set (35 cases), the baseline, two pre-registered experiments (both measured, neither adopted) and tracing are done. The service is not deployed; this repository is about the measurement.
 
 
-**Contents:** [Results](#results) · [Architecture](#architecture) · [Method](#method) · [What did not work](#what-did-not-work) · [Tracing](#tracing) · [Caveats](#caveats) · [Run it](#run-it) · [Roadmap](#roadmap) · [License](#license)
+**Contents:** [Results](#results) · [Architecture](#architecture) · [Method](#method) · [What did not work](#what-did-not-work) · [Tracing](#tracing) · [Caveats](#caveats) · [Where the numbers come from](#where-the-numbers-come-from) · [Run it](#run-it) · [Roadmap](#roadmap) · [License](#license)
 
 ---
 
@@ -174,6 +174,30 @@ One trace per request: an `analyze` span (formula, context, verdict, status) wit
 
 ---
 
+## Where the numbers come from
+
+Every run is committed in `data/runs/<id>-<label>.json` (the configuration and the answer to every case, scored). The tables above can be recomputed on a fresh clone without a single LLM call:
+
+```bash
+uv run python src/db_init.py
+uv run python src/load_golden.py
+uv run python src/load_golden.py --set validation
+uv run python src/export_runs.py --import      # data/runs/*.json -> the database, run ids kept
+uv run python src/report.py --run 9 10 11      # any row below
+```
+
+| Table row | Runs |
+|---|---|
+| Golden: Qwen, original prompt, T=0.2 | 3 4 5 |
+| Golden: DeepSeek, T=0.2 (the adopted configuration) | 9 10 11 |
+| Golden: DeepSeek, T=0 (experiment E1) | 12 13 14 |
+| Golden: DeepSeek, `v2_locale` prompt (experiment E2) | 25 26 27 |
+| Validation: Qwen | 16 19 20 |
+| Validation: DeepSeek | 15 17 18 |
+| Validation: DeepSeek, `v2_locale` (E2) | 22 23 24 |
+
+Use `--run`, not `--label`, for E2: the label `deepseek-v2locale` is also carried by run 21, an interrupted 16-case run kept for the record. Runs 2, 6, 8 and 28 are smoke runs (5 cases). The pre-golden Node script results are in `data/baseline_node/`, the manual audit of the judge in `data/judge_audit_raw.txt`.
+
 ## Run it
 
 Needs: Python 3.14, [uv](https://docs.astral.sh/uv/), Docker.
@@ -204,7 +228,7 @@ The judge uses `JUDGE_BASE_URL` / `JUDGE_API_KEY` / `JUDGE_MODEL` when set, othe
 
 On Windows with Docker, connect to `127.0.0.1`, not `localhost` (the code does by default): `localhost` is tried as IPv6 first, the published port is IPv4 only, and a single script start took 130 s instead of 0.35 s.
 
-`tools/check_prompt_parity.py` verifies that the Python prompt is word for word the Node one.
+`tools/check_prompt_parity.py <path>/app/lib/analyze.ts` verifies that the Python prompt is word for word the Node one. The Node original is not published; the script documents how the port was checked before the first run.
 
 ---
 

@@ -1,6 +1,9 @@
 """Check that prompts/v1_node_parity.txt is word for word the Node SYSTEM_PROMPT.
 
-  uv run python tools/check_prompt_parity.py
+  uv run python tools/check_prompt_parity.py <path to the Node app>/app/lib/analyze.ts
+
+The Node original is not published; this check documents how the port was verified
+(prompt v1_node_parity was compared against it before the first run).
 
 Reads the template literal straight out of the Node source, so there is no
 retyped copy to drift. The only difference allowed: the ${dialect ? ... : ...}
@@ -12,7 +15,6 @@ import re
 import sys
 from pathlib import Path
 
-NODE_SRC = Path(r"C:\MY\Projects\fable_ideas\ideas\01-formula-error-explainer\app\lib\analyze.ts")
 PROMPT = Path(__file__).resolve().parent.parent / "prompts" / "v1_node_parity.txt"
 
 PRODUCT_EXPR = re.compile(
@@ -22,8 +24,8 @@ PRODUCT_EXPR = re.compile(
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
-def node_prompt() -> str:
-    src = NODE_SRC.read_text(encoding="utf-8").replace("\r\n", "\n")
+def node_prompt(node_src: Path) -> str:
+    src = node_src.read_text(encoding="utf-8").replace("\r\n", "\n")
     m = re.search(r"SYSTEM_PROMPT = \(dialect: Dialect\) => `(.*?)`;", src, re.S)
     if not m:
         raise SystemExit("SYSTEM_PROMPT template not found in analyze.ts")
@@ -34,7 +36,9 @@ def node_prompt() -> str:
 
 
 def main() -> None:
-    expected = node_prompt().rstrip("\n")
+    if len(sys.argv) != 2:
+        raise SystemExit(__doc__)
+    expected = node_prompt(Path(sys.argv[1])).rstrip("\n")
     actual = PROMPT.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip("\n")
     if expected == actual:
         print("identical to the Node prompt")
