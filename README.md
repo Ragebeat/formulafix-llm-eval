@@ -6,9 +6,14 @@ Paste a broken Excel or Google Sheets formula (`#REF!`, `#VALUE!`, `#N/A`, a cir
 
 This repository is the LLM core of a small product, ported from Node/Next.js to Python/FastAPI and rebuilt around **measurement**: a golden dataset with reference diagnoses, an evaluation harness, run storage in Postgres, prompts under git. The product itself was shelved (spreadsheet vendors ship built-in fix assistants); the engineering is what this repository is for.
 
-Same discipline as the [RAG project](../RAG): **every change is backed by a number on a fixed dataset, the success criteria are written down before the runs, and a single comparison of two LLM runs is not a conclusion.**
+Same discipline as the [RAG project](https://github.com/Ragebeat/rag-japanese-labour-law): **every change is backed by a number on a fixed dataset, the success criteria are written down before the runs, and a single comparison of two LLM runs is not a conclusion.**
 
+> **Verdict accuracy 0.879 with DeepSeek V4.1 Flash against 0.742 with Qwen on the golden set, and 0.781 against 0.648 on 35 validation cases the prompt was never tuned on. Both prompt experiments stayed within run-to-run noise and were not adopted.**
+>
 > **Status: finished.** The harness, the golden set (80 cases), a separate validation set (35 cases), the baseline, two pre-registered experiments (both measured, neither adopted) and tracing are done. The service is not deployed; this repository is about the measurement.
+
+
+**Contents:** [Results](#results) · [Architecture](#architecture) · [Method](#method) · [What did not work](#what-did-not-work) · [Tracing](#tracing) · [Caveats](#caveats) · [Run it](#run-it) · [Roadmap](#roadmap) · [License](#license)
 
 ---
 
@@ -24,6 +29,8 @@ Same discipline as the [RAG project](../RAG): **every change is backed by a numb
 | DeepSeek, T=0.2, the separator rule rewritten to depend on the locale (prompt `v2_locale`, not adopted, 3 runs) | 0.892 (0.888–0.900) | 0.776 (0.764–0.782) | not judged | 1 of 240 (invalid JSON) | 3.7 s, about $0.009 per run |
 
 The first two rows use the identical prompt and cases; only the model and the provider differ. The best configuration is the DeepSeek one at T=0.2 with the original prompt: neither experiment beat it by more than the run-to-run spread (details under "What did not work" and in [EXPERIMENTS.md](EXPERIMENTS.md)). Wrong in every run (systematic errors): 15 of 80 cases for Qwen, 6 of 80 for DeepSeek; the 3 cases of the locale category (g075, g077, g078) are wrong for both models. Cases that change verdict or error type between runs (noise): 18 for Qwen, 9 for DeepSeek. For DeepSeek the systematic part is at most 7.5 percentage points of verdict error, so on this set a prompt change can barely be told apart from noise by verdict; the headroom is in error type and in fix correctness.
+
+Wrong in every run (systematic errors): 15 of 80 cases for Qwen, 6 of 80 for DeepSeek; 3 locale cases (g075, g077, g078) are wrong for both models. Cases whose verdict or error type changes between runs (noise): 18 for Qwen, 9 for DeepSeek. For DeepSeek the systematic part is at most 7.5 percentage points of verdict error, so on this set a prompt change in verdict is barely distinguishable from noise; the headroom is in error type and fix correctness.
 
 ### Validation set (35 cases the prompt was never tuned on)
 
@@ -129,7 +136,7 @@ Fixes that string matching cannot decide are judged by `openai/gpt-oss-120b`, a 
 
 ---
 
-## What did not work (so far)
+## What did not work
 
 - **The baseline model was retired mid-project.** Groq shut down `qwen/qwen3-32b` (deprecation announced 17 June 2026); its suggested replacement `qwen3.6-27b` was already missing from the model list when checked, and `qwen3.8-27b` was available. The "before" numbers had to be recomputed on `qwen/qwen3.8-27b`; the old test results are history only. The exact model id and date are recorded with every run.
 - **A free-tier output-tokens-per-minute cap** (1,000 tokens/min on the on-demand tier for that model) rejects a request that asks for `max_tokens=1024` before it is generated. Found on the first Node run; it shapes how fast a golden run can go (a pause between cases, retries that honour `Retry-After`).
@@ -139,7 +146,6 @@ Fixes that string matching cannot decide are judged by `openai/gpt-oss-120b`, a 
 - **Routing through an aggregator adds noise that looks like model noise.** The first five test requests to the same model id were served by four different providers (the model has about 30 endpoints with fp4, fp8 and unspecified quantization). The provider that answered is now stored with every result, and the runs are pinned to one fp8 endpoint with fallbacks disabled (the model vendor's own endpoint was excluded by the account's data policy: it may train on paid-model prompts).
 - **`temperature` 0 did not give the stability that was asked for, and it fixed the errors in place.** Criteria set before the run: success = stability ≥ 0.95 with the mean verdict ≥ 0.850; failure = stability < 0.93 or the mean verdict < 0.850. Result: stability 0.938 (was 0.886 at 0.2), mean verdict 0.862 (was 0.879): in between, so not counted as a success. The unstable cases fell from 9 to 5, but the cases wrong in every run rose from 6 to 10: at 0.2 the model sometimes got them right by chance, at 0 it is wrong every time. Verdict and fix correctness did not improve beyond the run-to-run spread, so the default stays at 0.2.
 - **Rewriting one prompt rule for locales gained about one point and was not adopted.** The old rule said the model must accept both `,` and `;` as argument separators, which clashes with a user who says their Russian Excel rejects a formula written with commas. The rule was replaced by one that ties separators and the decimal comma to the locale; criteria were fixed before the runs (the change must fix the locale cases, including `g077` and `v010`, and cost at most two regressions elsewhere). Result: `v010` went from wrong in every run to right in every run, and two more locale cases improved; but `g077`, the case that motivated the change, stayed wrong, because the model now says the arguments are separated by `;` when the formula plainly uses commas: a reading error that a rule cannot fix. Two cases got worse (`g015`, `v019`), one of them plausibly because the model became more lenient about locale-looking input. Mean verdict: 0.892 against 0.879 on the golden set, unchanged on the validation set: inside the run-to-run spread. Swapping the model moved the verdict by 14 points; this rule moved it by about one. Not adopted; the Qwen confirmation run was skipped by the pre-agreed order (check the target first, run the guards only if it passes).
-- *(more here as the experiments run: what a prompt change helped, and what it broke elsewhere)*
 
 ---
 
@@ -175,7 +181,7 @@ Needs: Python 3.14, [uv](https://docs.astral.sh/uv/), Docker.
 ```
 cp .env.example .env                 # set POSTGRES_PASSWORD and LLM_API_KEY
 uv sync
-docker compose up -d
+docker compose up -d --wait
 uv run python src/db_init.py
 uv run python src/load_golden.py     # validates the golden set, then loads it
 
@@ -213,3 +219,9 @@ On Windows with Docker, connect to `127.0.0.1`, not `localhost` (the code does b
 - [x] Tracing (OpenTelemetry spans viewed in Phoenix, opt-in)
 - [x] Russian and Japanese README
 - [ ] Not planned: CI regression tests and deployment (the product is shelved, there is no production to protect)
+
+---
+
+## License
+
+Code: [MIT](LICENSE). The golden and validation sets are original test data written for this project.
