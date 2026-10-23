@@ -13,7 +13,7 @@ Same discipline as the [RAG project](https://github.com/Ragebeat/rag-japanese-la
 > **Status: finished.** The harness, the golden set (80 cases), a separate validation set (35 cases), the baseline, two pre-registered experiments (both measured, neither adopted) and tracing are done. The service is not deployed; this repository is about the measurement.
 
 
-**Contents:** [Results](#results) · [Architecture](#architecture) · [Method](#method) · [What did not work](#what-did-not-work) · [Tracing](#tracing) · [Caveats](#caveats) · [Where the numbers come from](#where-the-numbers-come-from) · [Run it](#run-it) · [Roadmap](#roadmap) · [License](#license)
+**Contents:** [Results](#results) · [Architecture](#architecture) · [Method](#method) · [What did not work](#what-did-not-work) · [Tracing](#tracing) · [Caveats](#caveats) · [Where the numbers come from](#where-the-numbers-come-from) · [Run it](#run-it) · [Roadmap](#roadmap) · [Related projects](#related-projects) · [License](#license)
 
 ---
 
@@ -240,6 +240,13 @@ On Windows with Docker, connect to `127.0.0.1`, not `localhost` (the code does b
 - [x] Tracing (OpenTelemetry spans viewed in Phoenix, opt-in)
 - [x] Russian and Japanese README
 - [ ] Not planned: CI regression tests and deployment (the product is shelved, there is no production to protect)
+
+---
+
+## Related projects
+
+- [RAG over Japanese labour law](https://github.com/Ragebeat/rag-japanese-labour-law) — retrieval and generation over e-Gov statutes; verbatim quotes checked by code, golden-set eval with run fingerprints.
+- [dental-agent](https://github.com/Ragebeat/dental-agent) — LangGraph booking agent with its own MCP server; the outcome is scored by the database state, not by an LLM judge.
 
 ---
 
